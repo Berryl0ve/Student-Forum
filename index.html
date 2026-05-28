@@ -1,0 +1,950 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Underground - Secure Student-Only Forum</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #060913;
+        }
+        .heading-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .mono-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Cyber-grid background pattern */
+        .bg-cyber-grid {
+            background-size: 50px 50px;
+            background-image: 
+                linear-gradient(to right, rgba(99, 102, 241, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(99, 102, 241, 0.02) 1px, transparent 1px);
+        }
+        .glass-card {
+            background: rgba(13, 18, 30, 0.8);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .glass-card:hover {
+            border-color: rgba(99, 102, 241, 0.15);
+        }
+        .glow-red {
+            box-shadow: 0 0 40px rgba(239, 68, 68, 0.35);
+        }
+        .glow-indigo {
+            box-shadow: 0 0 45px rgba(99, 102, 241, 0.2);
+        }
+        .glow-green {
+            box-shadow: 0 0 40px rgba(16, 185, 129, 0.2);
+        }
+        /* Custom scrollbar config */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #060913;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+        /* Custom animations */
+        @keyframes pulse-siren {
+            0%, 100% { background-color: rgba(127, 29, 29, 0.95); }
+            50% { background-color: rgba(220, 38, 38, 0.98); }
+        }
+        .animate-pulse-siren {
+            animation: pulse-siren 1.5s infinite;
+        }
+        .scale-up {
+            animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes scaleUp {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="text-slate-200 bg-cyber-grid min-h-screen relative flex flex-col justify-between overflow-x-hidden antialiased">
+
+    <!-- SIREN / TEACHER INTERCEPTED LOCKDOWN MODAL -->
+    <div id="lockdownOverlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 text-center hidden animate-pulse-siren">
+        <div class="max-w-lg w-full bg-slate-950/90 border-4 border-red-500 rounded-3xl p-8 flex flex-col items-center shadow-2xl glow-red">
+            <!-- Warning Icon -->
+            <div class="w-24 h-24 bg-red-600/20 rounded-full flex items-center justify-center border-4 border-red-600 animate-bounce mb-6">
+                <i class="fa-solid fa-triangle-exclamation text-5xl text-red-500 animate-pulse"></i>
+            </div>
+            
+            <h1 class="heading-font text-3xl md:text-4xl font-black text-red-500 tracking-wider mb-2">EDUCATOR BREACH DETECTED</h1>
+            <p class="text-red-400 font-mono text-xs uppercase tracking-widest bg-red-950/80 px-3 py-1 rounded border border-red-700/50 mb-6">Security Protocol: Lockdown Active</p>
+            
+            <!-- Technical Diagnostic Stream -->
+            <div class="bg-black border border-red-900/50 p-4 rounded-xl text-left font-mono text-xs text-red-400 w-full mb-6 space-y-2 overflow-y-auto max-h-40">
+                <div>[SIGNAL MATCH] Analyzing telemetry heuristics...</div>
+                <div class="text-yellow-400">[WARNING] Subject selected forbidden administrative items.</div>
+                <div>[WARNING] Keyphrase matches detected: "Lesson Plan", "Syllabus" or similar traps.</div>
+                <div>[SYSTEM] Block rule initiated for user IP and machine profile.</div>
+                <div class="text-red-500 font-bold">[DENIED] Clearance level: 0. Go back to grading papers!</div>
+            </div>
+
+            <p class="text-slate-300 text-sm mb-6 max-w-sm leading-relaxed">
+                This area is strictly allocated for students. Please contact your campus IT administrator, or more appropriately, return to grading homework immediately.
+            </p>
+
+            <button onclick="dismissLockdown()" class="w-full py-3.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 active:scale-[0.98] transition-all font-bold text-white rounded-xl shadow-lg shadow-red-600/50">
+                Attempt Student Validation (Retry)
+            </button>
+        </div>
+    </div>
+
+    <!-- WRAPPER -->
+    <div class="max-w-6xl w-full mx-auto px-4 py-6 md:py-10 flex-grow">
+
+        <!-- NAV HEADER -->
+        <header class="flex justify-between items-center mb-10 pb-6 border-b border-slate-900">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/30">
+                    <i class="fa-solid fa-shield-halved text-xl text-white"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="heading-font font-bold text-lg md:text-xl text-white tracking-wide">UNDERGROUND</span>
+                        <span class="text-[9px] bg-red-500/10 text-red-400 px-2.5 py-0.5 rounded border border-red-500/20 font-mono uppercase tracking-widest font-bold">Strictly Protected</span>
+                    </div>
+                    <p class="text-xs text-slate-500 font-semibold">Strict peer accountability. Verification required to browse.</p>
+                </div>
+            </div>
+
+            <!-- Header Profile badge (Hidden initially until authenticated) -->
+            <div id="headerActions" class="flex gap-2 text-sm">
+                <div id="userBadge" class="hidden flex items-center gap-3 bg-slate-900/80 border border-slate-800 px-4 py-1.5 rounded-xl">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span id="activeUsername" class="font-bold text-indigo-300"></span>
+                    </div>
+                    <button onclick="logout()" class="text-slate-400 hover:text-red-400 transition-colors p-1" title="Log Out Securely">
+                        <i class="fa-solid fa-power-off"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- ================= STATE 1: SCREENING WALL (Visible by default) ================= -->
+        <section id="gatekeeperScreen" class="max-w-4xl mx-auto py-6 space-y-12 block">
+            <div class="text-center space-y-4 max-w-2xl mx-auto">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs font-semibold border border-amber-500/20">
+                    <i class="fa-solid fa-lock animate-pulse"></i> Database Encrypted & Locked
+                </div>
+                <h2 class="heading-font text-3xl md:text-5xl font-black leading-none text-white">
+                    Unlock the Student Forum
+                </h2>
+                <p class="text-slate-400 text-sm md:text-base leading-relaxed">
+                    Underground is a completely private network for classmates. To keep monitoring staff, administration, and teachers out, you must clear the student verification check.
+                </p>
+            </div>
+
+            <!-- THE GATEKEEPER SIGN-UP & CAPTCHA CONSOLE -->
+            <div class="glass-card max-w-xl mx-auto rounded-3xl p-6 md:p-8 glow-indigo border border-slate-800 relative scale-up">
+                <div class="text-center mb-6">
+                    <div class="w-12 h-12 bg-indigo-600/20 text-indigo-400 rounded-xl flex items-center justify-center mx-auto mb-3">
+                        <i class="fa-solid fa-id-card text-2xl"></i>
+                    </div>
+                    <h3 id="authTitle" class="heading-font text-xl font-bold text-white">Student Registration</h3>
+                    <p id="authSubtitle" class="text-xs text-slate-400 mt-1">Real-name registration verified with anti-teacher slang check.</p>
+                </div>
+
+                <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                    <!-- Real Name -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase font-mono tracking-wider">Your Full Real Name</label>
+                        <input type="text" id="authUsername" required placeholder="e.g., Emily Carter" class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl px-4 py-3 text-sm text-white outline-none transition">
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase font-mono tracking-wider">School Email Address</label>
+                        <input type="email" id="authEmail" required placeholder="e.g., emily.carter@student.school.edu" class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl px-4 py-3 text-sm text-white outline-none transition">
+                        <p class="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
+                            <i class="fa-solid fa-circle-info mr-1"></i> Staff domains ending in <code class="bg-black text-red-400 px-1 py-0.2 rounded font-mono">@school.edu</code> trigger locking matrices immediately.
+                        </p>
+                    </div>
+
+                    <!-- Bio with Teacher Bait keywords -->
+                    <div id="bioFieldGroup">
+                        <label class="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase font-mono tracking-wider">Describe your school routine</label>
+                        <textarea id="authBio" placeholder="Struggling in AP Chemistry, looking forward to winter break..." class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl px-4 py-2.5 text-sm text-white outline-none transition h-16 resize-none"></textarea>
+                        <p class="text-[10px] text-slate-500 mt-1">Warning: Evaluator checks for teacher jargon ("rubric", "syllabus", "pedagogy").</p>
+                    </div>
+
+                    <!-- MULTI-STAGE ANTI-TEACHER CAPTCHA -->
+                    <div id="captchaGroup" class="space-y-3 pt-2">
+                        
+                        <!-- Stage 1 Checkbox -->
+                        <div id="captchaCheckboxCard" class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between shadow-md">
+                            <div class="flex items-center gap-3">
+                                <div class="relative w-6 h-6 flex items-center justify-center">
+                                    <input type="checkbox" id="studentCheckbox" onclick="handleCaptchaCheckbox(this)" class="peer opacity-0 absolute inset-0 cursor-pointer w-full h-full z-10">
+                                    <div class="w-6 h-6 border-2 border-slate-700 bg-slate-950 rounded peer-checked:bg-indigo-600 peer-checked:border-indigo-600 flex items-center justify-center transition">
+                                        <i class="fa-solid fa-check text-xs text-white opacity-0 peer-checked:opacity-100 transition"></i>
+                                    </div>
+                                    <!-- Micro Spinner -->
+                                    <div id="captchaLoader" class="absolute inset-0 bg-slate-950 rounded flex items-center justify-center hidden">
+                                        <i class="fa-solid fa-circle-notch text-indigo-500 text-sm animate-spin"></i>
+                                    </div>
+                                </div>
+                                <span class="text-xs text-slate-300 font-medium select-none">I am a student (NOT a teacher trying to monitor gossip)</span>
+                            </div>
+                            <div class="flex flex-col items-center justify-center text-[8px] text-slate-500 font-mono">
+                                <i class="fa-solid fa-shield-halved text-base text-indigo-500/50 mb-0.5 animate-pulse"></i>
+                                <span>hCapGuard</span>
+                            </div>
+                        </div>
+
+                        <!-- Stage 2 Captcha Panel (Hidden until Checked) -->
+                        <div id="captchaChallengeBox" class="bg-white text-slate-900 rounded-2xl overflow-hidden shadow-2xl hidden border border-slate-300">
+                            <div class="bg-indigo-600 p-4 text-white">
+                                <span class="text-[9px] uppercase tracking-wider opacity-75 font-mono font-bold block mb-1">Slang Verification v3.2</span>
+                                <h4 class="text-sm font-bold leading-tight">Select all items containing:</h4>
+                                <p class="text-lg font-extrabold heading-font underline decoration-wavy decoration-indigo-300">STUDENT VIBES / GEN-Z CULTURE</p>
+                                <p class="text-[10px] opacity-90 mt-1">Do not click teacher traps or curriculum objects.</p>
+                            </div>
+
+                            <!-- 3x3 Verification Grid -->
+                            <div class="grid grid-cols-3 gap-1 p-2 bg-slate-100" id="captchaGrid">
+                                <!-- Dynamic Content in JS -->
+                            </div>
+
+                            <!-- CAPTCHA Action Bar -->
+                            <div class="flex justify-between items-center px-4 py-3 border-t border-slate-200 bg-slate-50">
+                                <!-- Helper Icons -->
+                                <div class="flex gap-4 text-slate-500 text-sm">
+                                    <button type="button" onclick="resetCaptchaGrid()" title="Refresh Matrix" class="hover:text-indigo-600 transition">
+                                        <i class="fa-solid fa-rotate-right"></i>
+                                    </button>
+                                    <button type="button" onclick="triggerAudioValidation()" title="Audio Code Challenge" class="hover:text-indigo-600 transition">
+                                        <i class="fa-solid fa-headphones"></i>
+                                    </button>
+                                    <button type="button" onclick="alert('Slang Check Level 4 active. Keep syllabus or curriculum files unselected.')" title="Security Info" class="hover:text-indigo-600 transition">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Trigger Action -->
+                                <button type="button" onclick="verifyCaptchaSelections()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs tracking-wider rounded uppercase transition-all shadow">
+                                    Verify Slang
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Error Box -->
+                    <div id="errorMessage" class="text-xs text-red-400 bg-red-500/10 border border-red-500/20 p-3 rounded-xl hidden"></div>
+
+                    <!-- Registration submit button -->
+                    <button type="submit" id="authSubmitBtn" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition-all text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30 text-sm font-semibold">
+                        Verify Identity & Access Forum
+                    </button>
+                </form>
+            </div>
+        </section>
+
+
+        <!-- ================= STATE 2: ACTIVE SECURED FORUM (Hidden by default) ================= -->
+        <main class="grid lg:grid-cols-12 gap-8 items-start mb-16 hidden" id="forumContainer">
+            
+            <!-- LEFT ASIDE -->
+            <aside class="lg:col-span-3 space-y-6">
+                <!-- Action Button -->
+                <button onclick="openCreatePostModal()" class="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 active:scale-[0.98] transition-all rounded-xl font-extrabold text-white flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 text-sm tracking-wide">
+                    <i class="fa-solid fa-plus-circle"></i> Create Verified Topic
+                </button>
+
+                <!-- Channels Panel -->
+                <div class="glass-card p-5 rounded-2xl space-y-3">
+                    <h3 class="text-[10px] uppercase font-mono tracking-wider text-slate-500 font-bold mb-2">Channels</h3>
+                    <div class="space-y-1">
+                        <button onclick="filterCategory('all')" class="category-btn w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-left transition font-medium bg-indigo-600/25 text-indigo-400 border border-indigo-500/20" data-cat="all">
+                            <i class="fa-solid fa-network-wired w-5 text-indigo-400"></i> All Feeds
+                        </button>
+                        <button onclick="filterCategory('gossip')" class="category-btn w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-left transition font-medium text-slate-400 hover:text-white hover:bg-slate-900 border border-transparent" data-cat="gossip">
+                            <i class="fa-solid fa-masks-theater w-5 text-purple-400"></i> Teacher Tea
+                        </button>
+                        <button onclick="filterCategory('homework')" class="category-btn w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-left transition font-medium text-slate-400 hover:text-white hover:bg-slate-900 border border-transparent" data-cat="homework">
+                            <i class="fa-solid fa-graduation-cap w-5 text-amber-400"></i> Exam Leaks & Tips
+                        </button>
+                        <button onclick="filterCategory('confessions')" class="category-btn w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-left transition font-medium text-slate-400 hover:text-white hover:bg-slate-900 border border-transparent" data-cat="confessions">
+                            <i class="fa-solid fa-bullhorn w-5 text-red-400"></i> Confessions
+                        </button>
+                        <button onclick="filterCategory('memes')" class="category-btn w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-left transition font-medium text-slate-400 hover:text-white hover:bg-slate-900 border border-transparent" data-cat="memes">
+                            <i class="fa-solid fa-face-laugh-squint w-5 text-emerald-400"></i> Student Memes
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Alert Information Box -->
+                <div class="bg-indigo-950/20 border border-indigo-500/10 p-5 rounded-2xl space-y-2">
+                    <h4 class="text-xs font-bold text-indigo-400 font-mono tracking-wider uppercase flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500 animate-ping"></span> Real Name Active
+                    </h4>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">
+                        To maintain high peer trust, anonymous posts are completely deactivated. Every student here is verified with their registered real name.
+                    </p>
+                </div>
+            </aside>
+
+            <!-- FORUM FEED PANEL -->
+            <section class="lg:col-span-9 space-y-4">
+                
+                <!-- Filter bar & searching tools -->
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-900/40 p-4 rounded-2xl border border-slate-900">
+                    <div class="relative w-full sm:w-80">
+                        <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Search verified student topics..." class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-2.5 pl-10 text-sm outline-none transition text-white">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-500 text-xs"></i>
+                    </div>
+                    <div class="flex items-center gap-3 text-[11px] text-slate-400 font-mono">
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span> Firebase Live</span>
+                        <span class="text-slate-800">|</span>
+                        <span>Showing <span id="postCount">0</span> topics</span>
+                    </div>
+                </div>
+
+                <!-- POSTS FEED WRAPPER -->
+                <div id="postsFeed" class="space-y-4">
+                    <!-- Dynamic rendering in JS -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MAIN FOOTER -->
+    <footer class="border-t border-slate-950 py-8 text-center text-xs text-slate-600 bg-slate-950/40">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p>© 2026 Underground Network. Accountability standard. Powered by real-time Firestore sync.</p>
+            <div class="flex gap-4">
+                <a href="#" class="hover:text-slate-400 transition" onclick="alert('Heuristics check: Active on email patterns, profile bio phrasing, and Cap Guard matrices.')">Firewall Specs</a>
+                <a href="#" class="hover:text-slate-400 transition">Forum Bylaws</a>
+                <a href="#" class="hover:text-red-400 text-red-500/50 transition" onclick="triggerSecretTeacherLockdown()">Teacher Audit Link</a>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- MODAL: MAKE VERIFIED FORUM POST -->
+    <div id="createPostModal" class="fixed inset-0 bg-black/80 z-40 flex items-center justify-center p-4 hidden">
+        <div class="max-w-lg w-full glass-card rounded-3xl p-8 glow-indigo relative scale-up">
+            
+            <button onclick="closeCreatePostModal()" class="absolute top-5 right-5 text-slate-500 hover:text-white transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="text-center mb-6">
+                <h3 class="heading-font text-2xl font-bold text-white flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-feather text-indigo-400"></i> Publish Verified Student Topic
+                </h3>
+                <p class="text-xs text-slate-400 mt-1">This will be permanently published under your verified real name.</p>
+            </div>
+
+            <form id="createPostForm" onsubmit="handleCreatePost(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase font-mono">Title</label>
+                    <input type="text" id="postTitle" required placeholder="e.g., Mrs. Smith leaked AP Bio test resources..." class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl px-4 py-3 text-sm text-white outline-none transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase font-mono">Channel</label>
+                    <select id="postCategory" class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl px-4 py-3 text-sm text-white outline-none transition">
+                        <option value="gossip">Teacher Tea</option>
+                        <option value="homework">Homework Cheats</option>
+                        <option value="confessions">Confessions</option>
+                        <option value="memes">Student Memes</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase font-mono">Intel / Details</label>
+                    <textarea id="postContent" required placeholder="Describe the school situation clearly..." class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl px-4 py-3 text-sm text-white outline-none transition h-32"></textarea>
+                </div>
+
+                <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition-all text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30 text-sm">
+                    Publish Topic
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, updateDoc, addDoc, collection, onSnapshot, getDocs, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // =========================================================================
+        //  STEP 1: PASTE YOUR OWN FIREBASE CONFIG FROM THE FIREBASE CONSOLE HERE!
+        // =========================================================================
+        const firebaseConfig = {
+  apiKey: "AIzaSyDvQ5dtjOGNK2F3NX6D0D-W3LHcxgEKws8",
+  authDomain: "student-forum-b2222.firebaseapp.com",
+  projectId: "student-forum-b2222",
+  storageBucket: "student-forum-b2222.firebasestorage.app",
+  messagingSenderId: "160952677983",
+  appId: "1:160952677983:web:50713b21ef141af33b4dea"}
+        // =========================================================================
+
+        const appId = "underground-school-forum";
+
+        // Initialize Firebase services
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Core App System state
+        let currentUser = null;
+        let authUserObj = null;
+        let activeCategoryFilter = 'all';
+        let searchQuery = '';
+        let blockedCount = 284;
+        let captchaVerified = false;
+        let selectedCaptchaIds = [];
+        let dbPosts = [];
+
+        // CAPTCHA POOL DATA: Real student culture items versus strict admin items (bait)
+        const captchaPool = [
+            { id: 1, type: "student", label: "W Rizz", icon: "👑", desc: "Supreme flirting skills" },
+            { id: 2, type: "teacher", label: "Syllabus.pdf", icon: "📑", desc: "Detailed curriculum matrix" },
+            { id: 3, type: "student", label: "No Cap", icon: "🧢", desc: "No lies, absolute truth" },
+            { id: 4, type: "teacher", label: "Lesson Plan", icon: "📁", desc: "Instructional learning matrix" },
+            { id: 5, type: "student", label: "Let Him Cook", icon: "🔥", desc: "Allow them space to perform" },
+            { id: 6, type: "teacher", label: "Hall Pass", icon: "🎟️", desc: "Facility transit clearance document" },
+            { id: 7, type: "student", label: "Looksmaxxing", icon: "🤫", desc: "Mewing / jawline definition" },
+            { id: 8, type: "teacher", label: "Detailed Rubric", icon: "📊", desc: "Assignment scoring standard" },
+            { id: 9, type: "student", label: "Skibidi", icon: "🚽", desc: "Nonsensical trend-slang" }
+        ];
+
+        // Seed default topics to initialize Firestore if collection is completely empty
+        
+                ]
+            }
+        ];
+
+        // Auth initialization & listener (Rule 3)
+        const initAuth = async () => {
+            try {
+                // Since this runs on GitHub Pages, we will log in anonymously.
+                await signInAnonymously(auth);
+            } catch (err) {
+                console.error("Firebase auth initialization error:", err);
+            }
+        };
+        initAuth();
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                authUserObj = user;
+                // Setup Firestore listeners once authenticated
+                setupFirestoreSync();
+            }
+        });
+
+        // Setup real-time listeners for public student postings (Strict Rules 1 & 2)
+        function setupFirestoreSync() {
+            if (!authUserObj) return;
+
+            // Target strictly public data location path as mandated by Rule 1
+            const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'forumPosts');
+
+            onSnapshot(collectionRef, (snapshot) => {
+                let posts = [];
+                snapshot.forEach((doc) => {
+                    posts.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Sort posts in memory locally by timestamp descending (Strict Rule 2)
+                posts.sort((a, b) => b.timestamp - a.timestamp);
+
+                // If empty, seed Firestore with initial mock data
+                if (posts.length === 0) {
+                    seedDatabase(collectionRef);
+                } else {
+                    dbPosts = posts;
+                    renderPosts();
+                }
+            }, (error) => {
+                console.error("Firestore sync subscription error:", error);
+            });
+        }
+
+        async function seedDatabase(collectionRef) {
+            for (let item of initialSeedData) {
+                await addDoc(collectionRef, item);
+            }
+        }
+
+        // Render posts from state
+        function renderPosts() {
+            const feed = document.getElementById('postsFeed');
+            feed.innerHTML = '';
+
+            const filtered = dbPosts.filter(post => {
+                if (activeCategoryFilter !== 'all' && post.category !== activeCategoryFilter) {
+                    return false;
+                }
+                if (searchQuery) {
+                    const searchLower = searchQuery.toLowerCase();
+                    return post.title.toLowerCase().includes(searchLower) || post.content.toLowerCase().includes(searchLower);
+                }
+                return true;
+            });
+
+            document.getElementById('postCount').innerText = filtered.length;
+
+            if (filtered.length === 0) {
+                feed.innerHTML = `
+                    <div class="glass-card p-12 text-center rounded-3xl border border-slate-900">
+                        <div class="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-500 text-2xl">
+                            <i class="fa-solid fa-circle-info"></i>
+                        </div>
+                        <h4 class="font-bold text-lg text-white heading-font">No transmissions found</h4>
+                        <p class="text-xs text-slate-400 mt-1">Try another channel, start a fresh post, or modify your search criteria.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(post => {
+                const authorDisplay = post.author;
+                const authorClass = "text-indigo-400 font-semibold";
+                
+                let badgeStyle = "bg-indigo-500/10 text-indigo-400 border-indigo-500/20";
+                let badgeText = post.category;
+                
+                if (post.category === 'gossip') { badgeStyle = "bg-purple-500/10 text-purple-400 border-purple-500/20"; badgeText = "Teacher Tea"; }
+                if (post.category === 'homework') { badgeStyle = "bg-amber-500/10 text-amber-400 border-amber-500/20"; badgeText = "Exam Leaks"; }
+                if (post.category === 'confessions') { badgeStyle = "bg-red-500/10 text-red-400 border-red-500/20"; badgeText = "Confession"; }
+                if (post.category === 'memes') { badgeStyle = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"; badgeText = "Student Meme"; }
+
+                const userId = authUserObj?.uid || "anonymous";
+                const hasLiked = post.likedBy && post.likedBy[userId] === true;
+
+                const likeBtnClass = hasLiked 
+                    ? "bg-indigo-600/25 text-indigo-400 border border-indigo-500/30" 
+                    : "bg-slate-950 border border-slate-900 text-slate-400 hover:text-white hover:border-slate-800";
+
+                // Format Time
+                let timeString = "Just now";
+                if (post.timestamp) {
+                    const diff = Date.now() - post.timestamp;
+                    if (diff > 3600000 * 24) {
+                        timeString = "Yesterday";
+                    } else if (diff > 3600000) {
+                        timeString = Math.floor(diff / 3600000) + " hours ago";
+                    } else if (diff > 60000) {
+                        timeString = Math.floor(diff / 60000) + " minutes ago";
+                    }
+                }
+
+                let commentsHtml = '';
+                if (post.comments && post.comments.length > 0) {
+                    commentsHtml = `
+                        <div class="mt-4 pt-4 border-t border-slate-900/60 space-y-3">
+                            <h5 class="text-[10px] font-bold text-slate-500 uppercase font-mono tracking-wider">Comments (${post.comments.length})</h5>
+                            <div class="space-y-2">
+                                ${post.comments.map(c => `
+                                    <div class="bg-slate-950/40 p-3 rounded-xl border border-slate-900/40 text-xs">
+                                        <div class="flex justify-between mb-1">
+                                            <span class="font-bold text-indigo-300">${c.author}</span>
+                                            <span class="text-[9px] text-slate-600">Student Reply</span>
+                                        </div>
+                                        <p class="text-slate-300 leading-relaxed">${c.content}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                const postEl = document.createElement('article');
+                postEl.className = "glass-card p-5 md:p-6 rounded-2xl relative border border-slate-900 transition-all duration-300";
+                postEl.innerHTML = `
+                    <div class="flex justify-between items-start gap-4 mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="${authorClass} text-xs md:text-sm"><i class="fa-solid fa-circle-check text-[10px] text-emerald-500 mr-1"></i>${authorDisplay}</span>
+                            <span class="text-[10px] text-slate-500 font-mono">${timeString}</span>
+                        </div>
+                        <span class="text-[10px] px-2.5 py-1 rounded-full border ${badgeStyle} font-mono font-bold capitalize">${badgeText}</span>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h4 class="font-bold text-sm md:text-base text-white leading-snug">${post.title}</h4>
+                        <p class="text-xs md:text-sm text-slate-400 leading-relaxed">${post.content}</p>
+                    </div>
+
+                    <div class="flex items-center gap-2 mt-5">
+                        <button onclick="toggleLike('${post.id}')" class="px-4 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition ${likeBtnClass}">
+                            <i class="fa-solid fa-heart ${hasLiked ? 'text-indigo-400 animate-bounce' : ''}"></i> 
+                            <span>${post.likes || 0}</span>
+                        </button>
+                        <button onclick="focusCommentInput('${post.id}')" class="px-4 py-1.5 rounded-xl bg-slate-950 border border-slate-900 text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-2 transition">
+                            <i class="fa-solid fa-message"></i> 
+                            <span>Reply</span>
+                        </button>
+                    </div>
+
+                    <div id="commentInputContainer-${post.id}" class="mt-4 hidden animate-scaleUp">
+                        <div class="flex gap-2">
+                            <input type="text" id="commentText-${post.id}" placeholder="Type comments..." class="flex-1 bg-slate-950 border border-slate-900 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition">
+                            <button onclick="submitComment('${post.id}')" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl text-xs font-bold text-white transition">Send</button>
+                        </div>
+                    </div>
+
+                    ${commentsHtml}
+                `;
+                feed.appendChild(postEl);
+            });
+        }
+
+        // Real-time upvotes with Transaction logic
+        window.toggleLike = async function(postId) {
+            if (!authUserObj) return;
+            const userId = authUserObj.uid;
+            const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'forumPosts', postId);
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const postDoc = await transaction.get(postRef);
+                    if (!postDoc.exists()) return;
+
+                    const data = postDoc.data();
+                    let likedBy = data.likedBy || {};
+                    let currentLikes = data.likes || 0;
+
+                    if (likedBy[userId] === true) {
+                        currentLikes = Math.max(0, currentLikes - 1);
+                        likedBy[userId] = false;
+                    } else {
+                        currentLikes += 1;
+                        likedBy[userId] = true;
+                    }
+
+                    transaction.update(postRef, {
+                        likes: currentLikes,
+                        likedBy: likedBy
+                    });
+                });
+            } catch (err) {
+                console.error("Upvote transactions failure: ", err);
+            }
+        };
+
+        // Real-time reply thread syncing
+        window.submitComment = async function(postId) {
+            if (!currentUser) return;
+            const input = document.getElementById(`commentText-${postId}`);
+            const commentVal = input.value.trim();
+            if (!commentVal) return;
+
+            const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'forumPosts', postId);
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const postDoc = await transaction.get(postRef);
+                    if (!postDoc.exists()) return;
+
+                    const data = postDoc.data();
+                    let comments = data.comments || [];
+                    comments.push({
+                        author: currentUser.username,
+                        content: commentVal
+                    });
+
+                    transaction.update(postRef, { comments: comments });
+                });
+
+                input.value = '';
+                document.getElementById(`commentInputContainer-${postId}`).classList.add('hidden');
+            } catch (err) {
+                console.error("Submitting comment transaction failed: ", err);
+            }
+        };
+
+        // Create Real-time topic on Firestore
+        window.handleCreatePost = async function(e) {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const title = document.getElementById('postTitle').value.trim();
+            const content = document.getElementById('postContent').value.trim();
+            const category = document.getElementById('postCategory').value;
+
+            const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'forumPosts');
+
+            try {
+                await addDoc(collectionRef, {
+                    title: title,
+                    content: content,
+                    category: category,
+                    author: currentUser.username,
+                    likes: 0,
+                    likedBy: {},
+                    timestamp: Date.now(),
+                    comments: []
+                });
+
+                closeCreatePostModal();
+                document.getElementById('postTitle').value = '';
+                document.getElementById('postContent').value = '';
+            } catch (err) {
+                console.error("Adding new post to database failed: ", err);
+            }
+        };
+
+        // UI & Filtering controls
+        window.filterCategory = function(cat) {
+            activeCategoryFilter = cat;
+            const buttons = document.querySelectorAll('.category-btn');
+            buttons.forEach(btn => {
+                if (btn.getAttribute('data-cat') === cat) {
+                    btn.className = "category-btn w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-left transition font-medium bg-indigo-600/25 text-indigo-400 border border-indigo-500/20";
+                } else {
+                    btn.className = "category-btn w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-left transition font-medium text-slate-400 hover:text-white hover:bg-slate-900 border border-transparent";
+                }
+            });
+            renderPosts();
+        };
+
+        window.handleSearch = function() {
+            searchQuery = document.getElementById('searchInput').value;
+            renderPosts();
+        };
+
+        window.handleCaptchaCheckbox = function(checkbox) {
+            if (!checkbox.checked) return;
+
+            const loader = document.getElementById('captchaLoader');
+            loader.classList.remove('hidden');
+
+            setTimeout(() => {
+                loader.classList.add('hidden');
+                document.getElementById('captchaCheckboxCard').classList.add('hidden');
+                document.getElementById('captchaChallengeBox').classList.remove('hidden');
+            }, 1400);
+        };
+
+        window.resetCaptchaGrid = function() {
+            selectedCaptchaIds = [];
+            const grid = document.getElementById('captchaGrid');
+            grid.innerHTML = '';
+
+            const shuffledPool = [...captchaPool].sort(() => Math.random() - 0.5);
+
+            shuffledPool.forEach(item => {
+                const cell = document.createElement('div');
+                cell.className = "relative bg-white border border-slate-200 aspect-square flex flex-col items-center justify-center p-2 cursor-pointer hover:bg-slate-50 transition active:scale-95 text-center group select-none";
+                cell.setAttribute('data-id', item.id);
+                cell.onclick = () => toggleCaptchaTile(cell, item.id);
+
+                cell.innerHTML = `
+                    <div class="text-2xl md:text-3xl mb-1">${item.icon}</div>
+                    <div class="text-[10px] font-extrabold text-slate-800 leading-tight">${item.label}</div>
+                    <div class="text-[8px] text-slate-400 font-medium hidden group-hover:block transition">${item.desc}</div>
+                    
+                    <!-- Grid Selected Overlay indicator -->
+                    <div class="absolute inset-0 bg-indigo-600/30 border-4 border-indigo-600 hidden justify-end items-start p-1" id="overlay-${item.id}">
+                        <div class="bg-indigo-600 text-white w-4 h-4 rounded-full flex items-center justify-center text-[8px]">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(cell);
+            });
+        };
+
+        function toggleCaptchaTile(element, id) {
+            const overlay = document.getElementById(`overlay-${id}`);
+            const index = selectedCaptchaIds.indexOf(id);
+
+            if (index > -1) {
+                selectedCaptchaIds.splice(index, 1);
+                overlay.style.display = 'none';
+            } else {
+                selectedCaptchaIds.push(id);
+                overlay.style.setProperty('display', 'flex', 'important');
+            }
+        }
+
+        window.triggerAudioValidation = function() {
+            alert("Secure Audio Challenge Broadcast: 'Skibidi toilet rizzler gyatt no cap'. Please enter exactly what you selected in the visual grid.");
+        };
+
+        window.verifyCaptchaSelections = function() {
+            const correctStudentIds = captchaPool.filter(i => i.type === "student").map(i => i.id);
+            const teacherTrapIds = captchaPool.filter(i => i.type === "teacher").map(i => i.id);
+
+            const clickedTeacherTrap = selectedCaptchaIds.some(id => teacherTrapIds.includes(id));
+            if (clickedTeacherTrap) {
+                triggerSecretTeacherLockdown();
+                return;
+            }
+
+            const containsAllSlang = correctStudentIds.every(id => selectedCaptchaIds.includes(id));
+
+            if (containsAllSlang && selectedCaptchaIds.length === correctStudentIds.length) {
+                captchaVerified = true;
+                
+                const container = document.getElementById('captchaChallengeBox');
+                container.innerHTML = `
+                    <div class="bg-emerald-500/10 border border-emerald-500/20 p-4 text-emerald-400 flex items-center gap-3">
+                        <i class="fa-solid fa-circle-check text-xl"></i>
+                        <div>
+                            <div class="font-bold text-xs font-mono">CAPTCHA Verification: APPROVED</div>
+                            <p class="text-[10px] text-slate-400">Security match valid. Student clearance level 1 established.</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                alert("Evaluation failed. Make sure you select ALL squares matching student/Gen-Z culture and leave teacher traps unchecked.");
+                resetCaptchaGrid();
+            }
+        };
+
+        window.handleAuthSubmit = function(event) {
+            event.preventDefault();
+            const username = document.getElementById('authUsername').value.trim();
+            const email = document.getElementById('authEmail').value.trim().toLowerCase();
+            const bio = document.getElementById('authBio').value.trim().toLowerCase();
+            const errDiv = document.getElementById('errorMessage');
+
+            errDiv.classList.add('hidden');
+
+            if (!captchaVerified) {
+                errDiv.innerText = "CAPTCHA Check Required: Complete the secure slang validation challenge grid first.";
+                errDiv.classList.remove('hidden');
+                return;
+            }
+
+            const teacherDomains = ['@school.edu', '@staff.school.edu', '@teacher.school.edu', '@district.edu', '.edu'];
+            const isEmailStaff = teacherDomains.some(domain => email.endsWith(domain)) && !email.includes('student');
+
+            const teacherKeywords = ['curriculum', 'syllabus', 'grading', 'lesson plan', 'principal', 'superintendent', 'pedagogy'];
+            const containsTeacherKeywords = teacherKeywords.some(kw => bio.includes(kw));
+
+            if (isEmailStaff || containsTeacherKeywords) {
+                triggerSecretTeacherLockdown();
+                return;
+            }
+
+            currentUser = { username, email };
+            completeAuthentication(username);
+        };
+
+        function completeAuthentication(username) {
+            document.getElementById('gatekeeperScreen').classList.add('hidden');
+            document.getElementById('gatekeeperScreen').classList.remove('block');
+
+            document.getElementById('forumContainer').classList.remove('hidden');
+            document.getElementById('forumContainer').classList.add('grid');
+            
+            document.getElementById('userBadge').classList.remove('hidden');
+            document.getElementById('activeUsername').innerText = username;
+
+            renderPosts();
+        }
+
+        window.logout = function() {
+            currentUser = null;
+            
+            document.getElementById('forumContainer').classList.add('hidden');
+            document.getElementById('forumContainer').classList.remove('grid');
+
+            document.getElementById('gatekeeperScreen').classList.remove('hidden');
+            document.getElementById('gatekeeperScreen').classList.add('block');
+
+            document.getElementById('userBadge').classList.add('hidden');
+
+            captchaVerified = false;
+            document.getElementById('studentCheckbox').checked = false;
+            document.getElementById('captchaCheckboxCard').classList.remove('hidden');
+            document.getElementById('captchaChallengeBox').classList.add('hidden');
+            document.getElementById('authUsername').value = '';
+            document.getElementById('authEmail').value = '';
+            document.getElementById('authBio').value = '';
+        };
+
+        window.triggerSecretTeacherLockdown = function() {
+            document.getElementById('gatekeeperScreen').classList.add('hidden');
+            document.getElementById('forumContainer').classList.add('hidden');
+            document.getElementById('lockdownOverlay').classList.remove('hidden');
+            document.getElementById('lockdownOverlay').classList.add('flex');
+            playAlarmSound();
+        };
+
+        window.dismissLockdown = function() {
+            document.getElementById('lockdownOverlay').classList.add('hidden');
+            document.getElementById('lockdownOverlay').classList.remove('flex');
+            
+            document.getElementById('gatekeeperScreen').classList.remove('hidden');
+            document.getElementById('gatekeeperScreen').classList.add('block');
+            logout();
+        };
+
+        function playAlarmSound() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                
+                for (let i = 0; i < 4; i++) {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(900 + (i * 150), ctx.currentTime + (i * 0.2));
+                    
+                    gain.gain.setValueAtTime(0.12, ctx.currentTime + (i * 0.2));
+                    gain.gain.exponentialRampToValueAtTime(0.005, ctx.currentTime + (i * 0.2) + 0.18);
+                    
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    
+                    osc.start(ctx.currentTime + (i * 0.2));
+                    osc.stop(ctx.currentTime + (i * 0.2) + 0.18);
+                }
+            } catch (e) {
+                // Ignore audio permission context constraints
+            }
+        }
+
+        window.openCreatePostModal = function() {
+            if (!currentUser) return;
+            document.getElementById('createPostModal').classList.remove('hidden');
+        };
+
+        window.closeCreatePostModal = function() {
+            document.getElementById('createPostModal').classList.add('hidden');
+        };
+
+        window.focusCommentInput = function(postId) {
+            if (!currentUser) return;
+            const container = document.getElementById(`commentInputContainer-${postId}`);
+            container.classList.toggle('hidden');
+        };
+
+        // Initialize grid on startup
+        resetCaptchaGrid();
+    </script>
+</body>
+</html>
+
+```
