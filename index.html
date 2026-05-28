@@ -395,12 +395,13 @@
         //  STEP 1: PASTE YOUR OWN FIREBASE CONFIG FROM THE FIREBASE CONSOLE HERE!
         // =========================================================================
         const firebaseConfig = {
-  apiKey: "AIzaSyDvQ5dtjOGNK2F3NX6D0D-W3LHcxgEKws8",
-  authDomain: "student-forum-b2222.firebaseapp.com",
-  projectId: "student-forum-b2222",
-  storageBucket: "student-forum-b2222.firebasestorage.app",
-  messagingSenderId: "160952677983",
-  appId: "1:160952677983:web:50713b21ef141af33b4dea"}
+            apiKey: "AIzaSyDvQ5dtjOGNK2F3NX6D0D-W3LHcxgEKws8",
+            authDomain: "Ystudent-forum-b2222.firebaseapp.com",
+            projectId: "student-forum-b2222",
+            storageBucket: "student-forum-b2222.firebasestorage.app",
+            messagingSenderId: "160952677983",
+            appId: "160952677983:web:50713b21ef141af33b4dea"
+        };
         // =========================================================================
 
         const appId = "underground-school-forum";
@@ -434,7 +435,30 @@
         ];
 
         // Seed default topics to initialize Firestore if collection is completely empty
-        
+        const initialSeedData = [
+            {
+                title: "AP Bio exam file leaked inside the legacy shared archive",
+                content: "Guys, if you look inside the legacy AP Bio resource folder, there's a sub-folder named '_archive_22'. Inside it, the upcoming practice packet is literally identical to the final quiz Mrs. Higgins usually prints. Go study it before she locks it down!",
+                category: "homework",
+                author: "Tyler Higgins",
+                timestamp: Date.now() - 7200000, // 2 hours ago
+                likes: 42,
+                likedBy: {},
+                comments: [
+                    { author: "Michael Chang", content: "OMG it's actually there. Lifesaver." },
+                    { author: "Sophia Martinez", content: "Careful, she might monitor file download logs if we go all at once." }
+                ]
+            },
+            {
+                title: "Spotted Mr. Henderson practicing TikTok dances in the student lounge",
+                content: "I went to return a textbook to the history department room and literally peeked Mr. Henderson doing the Renegade in an empty classroom. He looked extremely serious, adjusting his glasses after every count. Can someone please tape this next time.",
+                category: "gossip",
+                author: "Sarah Jenkins",
+                timestamp: Date.now() - 14400000, // 4 hours ago
+                likes: 89,
+                likedBy: {},
+                comments: [
+                    { author: "Devon Brooks", content: "He is preparing to look 'relatable' for the pep rally tomorrow. Oh dear." }
                 ]
             }
         ];
